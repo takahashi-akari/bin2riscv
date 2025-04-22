@@ -14,9 +14,10 @@
 
 - ✅ Decompile x86_64 ELF to C
 - ✅ Auto-patch for portability (`__int64` → `int64_t`, etc.)
-- ✅ Replace Intel Intrinsics with RISC-V shim functions
+- ✅ Replace Intel Intrinsics with RISC-V shim functions (e.g., `_mm_add_pd` → `shim_mm_add_pd`)
 - ✅ Compile using `clang --target=riscv64-unknown-elf`
 - ✅ Optionally run in `qemu-riscv64`
+- ✅ Dockerfile included for full reproducibility
 
 ---
 
@@ -27,6 +28,7 @@
 - `clang` with RISC-V backend
 - `ld.lld` (for linking)
 - `qemu-riscv64` (optional for testing)
+- OR: just use Docker! 🐳
 
 ---
 
@@ -45,19 +47,34 @@ cd bin2riscv
 python bin2riscv.py your_binary.out
 ```
 
+or with the all-in-one shell script:
+
+```bash
+./bin2riscv.sh your_binary.out
+```
+
 This will generate:
 - `your_binary.c`: Decompiled C source
 - `your_binary_riscv.elf`: RISC-V executable
-- `intrin_shim.h`: Generated Intrinsics header
+- `intrin_shim.h`: Intrinsics header with stubbed RISC-V versions
 
 If `qemu-riscv64` is available, it will run the binary too.
+
+---
+
+## 🐳 Docker Support
+
+```bash
+docker build -t bin2riscv .
+docker run --rm -it -v $(pwd):/workspace bin2riscv ./bin2riscv.sh your_binary.out
+```
 
 ---
 
 ## 🔍 Limitations
 
 - Only simple binaries are supported for now (no dynamic linking, no syscalls)
-- Intrinsics mapping is minimal (only `_mm_add_pd` supported)
+- Intrinsics mapping is partial (e.g., only basic `_mm_*_pd` supported)
 - Reverse-engineered function names may be placeholder (`func_1`, etc.)
 - Not a security tool — purely experimental
 
@@ -65,11 +82,11 @@ If `qemu-riscv64` is available, it will run the binary too.
 
 ## 📅 Roadmap
 
-- [ ] Add more intrinsics to shim generator
-- [ ] Support custom `linker.ld` generation
-- [ ] Extend to support dynamic binaries
-- [ ] Build full LLVM IR pipeline (optional path)
-- [ ] Web UI?
+- [ ] Add more Intrinsics mappings (via scriptable JSON)
+- [ ] Support custom linker scripts and relocation
+- [ ] Extend to support dynamic binaries and libc
+- [ ] Build full LLVM IR pipeline
+- [ ] Optional: Web UI for drag-and-drop ELF → RISC-V conversion
 
 ---
 
@@ -82,3 +99,21 @@ Created by [takahashi-akari] — powered by curiosity and low-level wizardry.
 ## 📜 License
 
 MIT
+
+---
+
+## 📁 File List
+
+```
+bin2riscv.py           # Main CLI tool
+intrin_shim.h          # Generated header for RISC-V Intrinsics shim
+README.md              # Documentation (this file)
+linker.ld              # Minimal linker script for RISC-V ELF
+.gitignore             # Ignore temp and build artifacts
+requirements.txt       # Python dependencies (currently empty)
+bin2riscv.sh           # All-in-one shell automation
+intrin_shims.sh        # Intrinsics header generator
+Dockerfile             # Docker environment setup
+```
+
+Let’s convert some binaries 🚀
