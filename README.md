@@ -33,7 +33,7 @@
 ## 📦 Install
 
 ```bash
-git clone https://github.com/yourname/bin2riscv.git
+git clone https://github.com/takahashi-akari/bin2riscv.git
 cd bin2riscv
 ```
 
